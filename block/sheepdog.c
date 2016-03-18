@@ -2565,6 +2565,7 @@ static int sd_snapshot_delete(BlockDriverState *bs,
     SheepdogVdiRsp *rsp = (SheepdogVdiRsp *)&hdr;
 
     if (!remove_objects(s)) {
+        error_report("failed to discard snapshot inode");
         return -1;
     }
 
@@ -2588,6 +2589,7 @@ static int sd_snapshot_delete(BlockDriverState *bs,
     ret = find_vdi_name(s, s->name, snap_id, snap_tag, &vid, true,
                         &local_err);
     if (ret) {
+        error_report_err(local_err);
         return ret;
     }
 
@@ -2601,6 +2603,7 @@ static int sd_snapshot_delete(BlockDriverState *bs,
                  buf, &wlen, &rlen);
     closesocket(fd);
     if (ret) {
+        error_setg_errno(errp, -ret, "failed to delete %s", s->name);
         return ret;
     }
 
